@@ -24,6 +24,7 @@ RUN chmod +x /bin/db-migrate.sh
 COPY --from=composer:1.9.1 /usr/bin/composer /usr/bin/composer
 
 RUN composer
+RUN composer install
 
 ENTRYPOINT ["/bin/docker-entrypoint.sh"]
 
