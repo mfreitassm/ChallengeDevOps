@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # php artisan key:generate
-APP_KEY=$(php artisan key:generate --show)
-echo $APP_KEY
+# APP_KEY=$(php artisan key:generate --show)
+# echo $APP_KEY
 php artisan jwt:generate
 php artisan config:cache
 

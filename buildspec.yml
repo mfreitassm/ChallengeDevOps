@@ -5,6 +5,7 @@ phases:
     commands:
       - nohup /usr/local/bin/dockerd --host=unix:///var/run/docker.sock --host=tcp://127.0.0.1:2375 --storage-driver=overlay2 &
       - timeout 15 sh -c "until docker info; do echo .; sleep 1; done"
+      - sudo yum install jq
   pre_build:
     commands:
       - echo Logging in to Amazon ECR...
@@ -15,10 +16,15 @@ phases:
       - cp .env.example .env
       - echo Building the Docker image...
       - docker build -t $IMAGE_REPO_NAME .
+      - NEW_ECR_IMAGE=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG
       - docker tag $IMAGE_REPO_NAME:$IMAGE_TAG $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG
   post_build:
     commands:
       - echo Build completed on `date`
       - echo Pushing the Docker image...
       - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG
-      - aws ecs update-service --region "${AWS_DEFAULT_REGION}" --cluster "${CLUSTER_NAME}" --service "${SERVICE_NAME}" --force-new-deployment
+      - TASK_DEFINITION=$(aws ecs describe-task-definition --region="${AWS_DEFAULT_REGION}" --task-definition laravel-task-definition | jq '.taskDefinition | del(.taskDefinitionArn) | del(.status) | del(.requiresAttributes) | del(.compatibilities) | del(.registeredAt) | del(.registeredBy) | del(.revision)')
+      - echo $TASK_DEFINITION | jq '.containerDefinitions[0].image='\"${NEW_ECR_IMAGE}\" > task-definition.json
+      - aws ecs register-task-definition --family laravel-task-definition --region "$AWS_DEFAULT_REGION" --cli-input-json file://task-definition.json
+      - TASK_DEF_REVISION=$(aws ecs describe-task-definition --task-definition laravel-task-definition --query 'taskDefinition.revision')
+      - aws ecs update-service --region "${AWS_DEFAULT_REGION}" --cluster "${CLUSTER_NAME}" --service "${SERVICE_NAME}" --task-definition laravel-task-definition:$TASK_DEF_REVISION --force-new-deployment
