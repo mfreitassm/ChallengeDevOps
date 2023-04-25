@@ -7,7 +7,7 @@ RUN apt-get update -qq \
   && apt-get clean autoclean \
   && apt-get autoremove -y
 
-RUN docker-php-ext-install mysqli pdo pdo_mysql 
+RUN docker-php-ext-install mysqli pdo pdo_mysql
 
 WORKDIR /var/www/html
 ADD . .
@@ -23,8 +23,8 @@ RUN chmod +x /bin/db-migrate.sh
 
 COPY --from=composer:1.9.1 /usr/bin/composer /usr/bin/composer
 
-RUN composer install
+RUN composer
 
 ENTRYPOINT ["/bin/docker-entrypoint.sh"]
 
-CMD ["apache2-foreground"]
+CMD ["/bin/bash", "-c", "/bin/docker-entrypoint.sh"]

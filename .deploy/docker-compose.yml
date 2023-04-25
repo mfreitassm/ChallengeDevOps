@@ -7,6 +7,23 @@ services:
     env_file: ../.env
     working_dir: /var/www/html
     volumes:
-      - ../:/var/www/html
+      - ../:/var/www/html:rw
     ports:
      - 80:80
+    depends_on:
+      - db
+    environment:
+      DB_HOST: db
+      DB_USERNAME: homestead
+      DB_PASSWORD: secret
+      # APP_KEY: base64:GL+tMMGTUWZ9iW5gGrGNnEUc5OEh6uNyXBuwK/ozBtk=
+
+  db:
+    image: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: secret
+      MYSQL_DATABASE: homestead
+      MYSQL_USER: homestead
+      MYSQL_PASSWORD: secret
+    ports:
+      - "3306:3306"
