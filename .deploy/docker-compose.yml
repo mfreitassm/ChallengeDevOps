@@ -3,7 +3,6 @@ version: "3.2"
 services:
   laravel:
     build: ../
-    # image: 774358786862.dkr.ecr.ap-southeast-2.amazonaws.com/laravel-docker:latest
     entrypoint: ""
     env_file: ../.env
     working_dir: /var/www/html
