@@ -79,7 +79,7 @@
     <body>
         <div class="flex-center position-ref full-height">
             <div class="content">
-                <!-- <div class="subtitle m-b-md"> Hello World direct from CICD!! </div> -->
+                <div class="subtitle m-b-md"> Hello World direct from CICD!! </div>
                 <div class="title m-b-md"> Database: </div>
                 <div class="subtitle m-b-md {{$status}}">
                     <strong>{{ $database }} </strong>
